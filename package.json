@@ -1,0 +1,16 @@
+{
+  "name": "orientationchange-fix",
+  "version": "1.0.0",
+  "description": "orientationchange fix",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "orientationchange-fix",
+    "orientationchange",
+    "\u0016Polyfill"
+  ],
+  "author": "zhansingsong",
+  "license": "MIT"
+}
