@@ -1,6 +1,6 @@
     /**
-     * pl library :　orientation detection
-     * 横竖屏检测库
+     * orientationchange-fix
+     * orientationchange修复实用库
      */
     ;
     (function(win) {
