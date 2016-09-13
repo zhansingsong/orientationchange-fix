@@ -81,7 +81,7 @@
             // 载入样式     
             loadStyleString(cssstr);
             // 添加类
-            html.className = 'orientation' + html.className;
+            html.className = 'orientation ' + html.className;
             if (hstyle['font-family'] === pstr) { //初始化判断
                 meta.init = 'portrait';
                 meta.current = 'portrait';
