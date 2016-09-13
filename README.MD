@@ -2,7 +2,8 @@
 ## English
 ### description
 **orientationchange-fix** is a based on `@media` attribute to fix `orientationchange` utility library, orientaionchange polyfill. it is more reliable and easy to detect oritentation of mobile device.
-
+### test demo
+![qrcode](qrcode.png)
 ### usage
 Include **orientationchange-fix** library script in your `<head></head>` markup。
 **Warning:**  putting the script after `<style></style>`, in order to not break `font-family` of `<html></html>`
