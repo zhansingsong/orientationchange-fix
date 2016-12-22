@@ -35,6 +35,9 @@ window.neworientation:{
   current: 'portrait|landscape'//current state of orientation
 }
 ```
+## changelog
+1.1.0: rewrite fire method
+
 
 ## 中文
 orientationchange-fix是一个基于CSS3`@media`特性实现对原生`orientationchange`修复的实用库，它让orientation detection更加可靠，更加easy。
@@ -71,7 +74,8 @@ window.neworientation:{
   current: 'portrait|landscape'//当前横竖屏的状态
 }
 ```
-
+### changelog
+1.1.0: 重写原生事件的触发方法
 
 ### License
 **orientationchange-fix.js** is covered by the MIT License.
