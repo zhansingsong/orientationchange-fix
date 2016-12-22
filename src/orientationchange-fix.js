@@ -11,7 +11,7 @@
         // 是否支持orientationchange事件
         var isOrientation = ('orientation' in window && 'onorientationchange' in window);
         meta.isOrientation = isOrientation;
-       
+
         // font-family
         var html = document.documentElement,
             hstyle = win.getComputedStyle(html, null),
@@ -32,26 +32,88 @@
             _head.appendChild(_style);
             return _style;
         }
-       
+
         // 触发原生orientationchange
-        var fire = function() {
-            var e;
-            if (document.createEvent) {
-                e = document.createEvent('HTMLEvents');
-                e.initEvent(eventType, true, false);
-                win.dispatchEvent(e);
-            } else {
-                e = document.createEventObject();
-                e.eventType = eventType;
-                if (win[eventType]) {
-                    win[eventType]();
-                } else if (win['on' + eventType]) {
-                    win['on' + eventType]();
-                } else {
-                    win.fireEvent(eventType, e);
+        var isSupportCustomEvent = window.CustomEvent ? true : false,
+            fireEvent;
+        
+        // https://github.com/krambuhl/custom-event-polyfill/blob/master/custom-event-polyfill.js
+        // Polyfill for creating CustomEvents on IE9/10/11
+        if (isSupportCustomEvent) {
+            try {
+                var ce = new window.CustomEvent('test');
+                ce.preventDefault();
+                if (ce.defaultPrevented !== true) {
+                    // IE has problems with .preventDefault() on custom events
+                    // http://stackoverflow.com/questions/23349191
+                    throw new Error('Could not prevent default');
                 }
+            } catch (e) {
+                var CustomEvent = function(event, params) {
+                    var evt, origPrevent;
+                    params = params || {
+                        bubbles: false,
+                        cancelable: false,
+                        detail: undefined
+                    };
+
+                    evt = document.createEvent("CustomEvent");
+                    evt.initCustomEvent(event, params.bubbles, params.cancelable, params.detail);
+                    origPrevent = evt.preventDefault;
+                    evt.preventDefault = function() {
+                        origPrevent.call(this);
+                        try {
+                            Object.defineProperty(this, 'defaultPrevented', {
+                                get: function() {
+                                    return true;
+                                }
+                            });
+                        } catch (e) {
+                            this.defaultPrevented = true;
+                        }
+                    };
+                    return evt;
+                };
+
+                CustomEvent.prototype = window.Event.prototype;
+                window.CustomEvent = CustomEvent; // expose definition to window
             }
         }
+
+        fireEvent = isSupportCustomEvent ? function(element, eventName, params) {
+            var evt = document.createEvent('CustomEvent');
+            if (params) {
+                evt.initCustomEvent(eventName, params.bubbles, params.cancelable, params.detail);
+            } else {
+                evt.initCustomEvent(eventName, false, false, void(0));
+            }
+            if (element.dispatchEvent) {
+                element.dispatchEvent(evt);
+            }
+            return evt;
+        } : function(element, eventName, params) {
+            var evt = document.createEventObject();
+            evt.type = eventName;
+            if (params) {
+                evt.bubbles = Boolean(params.bubbles);
+                evt.cancelable = Boolean(params.cancelable);
+                evt.detail = params.detail;
+            } else {
+                evt.bubbles = false;
+                evt.cancelable = false;
+                evt.detail = void(0);
+            }
+            // fire
+            if (element[eventName]) {
+                element[eventName](evt);
+            } else if (element['on' + eventName]) {
+                element['on' + eventName](evt);
+            } else if (element.fireEvent && ('on' + eventName) in element) { //针对IE8及以下版本，fireEvent|attachEvent|detachEvent只能使用如下事件名
+                element.fireEvent('on' + eventName, evt);
+            }
+            return evt;
+        };
+
 
         // callback
         var orientationCB = function(e) {
@@ -70,7 +132,7 @@
                 if (win.orientation === 90 || win.orientation === -90) {
                     meta.current = 'landscape';
                 }
-                fire();
+                fireEvent(window, eventType);
             }
         };
         var resizeCB = function() {
@@ -93,12 +155,12 @@
                 if (hstyle['font-family'] === pstr) {
                     if (meta.current !== 'portrait') {
                         meta.current = 'portrait';
-                        fire();
+                        fireEvent(window, eventType);
                     }
                 } else {
                     if (meta.current !== 'landscape') {
                         meta.current = 'landscape';
-                        fire();
+                        fireEvent(window, eventType);
                     }
                 }
             }
@@ -113,6 +175,6 @@
 
         // 监听
         win.addEventListener(isOrientation ? 'orientationchange' : 'resize', callback, false);
-        
+
         win.neworientation = meta;
     })(window);
